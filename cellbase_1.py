@@ -64,7 +64,7 @@ def get_annotation(gc, genes, dataframe):
 
 def main():
     """
-    Main function to generate bed file. 
+    Main function to generate bed file.
     """
 
     # To switch to version 5 as it has refseq annotations
