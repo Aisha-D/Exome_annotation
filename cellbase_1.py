@@ -4,6 +4,11 @@ import pandas as pd
 import argparse
 
 def parse_args():
+    """Reads on argument passed at the cmd line
+
+    Returns:
+        args: args held in an object
+    """
     
     parser = argparse.ArgumentParser(description = 'Generate a bed file using cellbase annotation')
     parser.add_argument(
@@ -17,6 +22,15 @@ def parse_args():
     return args
 
 def get_annotation(gc, genes, dataframe):
+    """Gets transcript & exon annotation for genes
+
+    Args:
+        gc (class): GeneClient - holds informations on genes
+        genes (list): genes listed on cmd line
+        dataframe (pd dataframe): empty dataframe
+    Returns:
+        dataframe: dataframe holds information on all genes
+    """
 
     for gene in genes:
         tf_response = gc.get_transcript(gene) 
