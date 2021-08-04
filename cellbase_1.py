@@ -48,8 +48,6 @@ def get_annotation(gc, genes, dataframe):
 
     return dataframe
 
-
-
 def main():
     """
     Main function to generate bed file.
@@ -68,10 +66,8 @@ def main():
     dataframe = pd.DataFrame() 
 
     # read in genes
-    #genes = ['BRCA1', 'APOE']
     args = parse_args()
     genes = list(filter(None, [x.strip() for x in args.genes.split(",")]))
-    #print(list(args.genes))
     print("Genes: " + str(genes))
 
     annotated_genes = get_annotation(gc, genes, dataframe)
