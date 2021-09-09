@@ -18,7 +18,6 @@ HGNC_df = pd.read_csv('HGNC_210902.tsv', sep='\t')
 # this list will contain all the HGNC_ids and relevant MANE RefSeq transcripts
 all_genes = []
 
-# len(HGNC_df)
 
 for row in range(len(HGNC_df)):
     HGNC_id = HGNC_df.iloc[row, 0] #HGNC ID is in 0th column
@@ -31,12 +30,7 @@ for row in range(len(HGNC_df)):
         # make dict to keep info on what refseq is for ensemble gene in cellbase
         gene_dict = {}
         gene_dict['HGNC_ID'] = HGNC_id
-        # ## get url version
-        # url_get = "feature/gene/"
-        # url_end = "/info"
-        # url_address = host_address + url_get + ensemble_id + url_end
-        # with urllib.request.urlopen(url_address) as url:
-        #     data = json.loads(url.read().decode())
+        # get all info and select transcript info
         data = gc.get_info(ensemble_id)
         # some ensemble gene id not present in cellbase so skip these
         if not data['responses'][0]['results']:
@@ -54,8 +48,7 @@ for row in range(len(HGNC_df)):
                     # for these, we skip to the next transcript
                     continue
                 else:
-                    # print("Transcript number " + str(transcript) + " DOES have Mane RefSeq Annotaion")
-                    # print(mane_dict[0]['id'])
+                    # refseq mane id is selected and added to the dict
                     gene_dict['MANE_RefSeqID'] = mane_dict[0]['id']
             # append the gene_dict to the list of all HGNC ids
             all_genes.append(gene_dict) 
@@ -63,7 +56,6 @@ for row in range(len(HGNC_df)):
 
 
 # Save all hgnc ids and relevent refseq mane transcripts to dataframe 
-
 df = pd.DataFrame.from_dict(all_genes)
 df_noNaN = df[pd.notnull(df['MANE_RefSeqID'])]
 # rest index to allow merging of columns later
