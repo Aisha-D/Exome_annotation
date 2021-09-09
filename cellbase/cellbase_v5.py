@@ -2,13 +2,12 @@ from pandas.core.frame import DataFrame
 from pycellbase.cbconfig import ConfigClient
 from pycellbase.cbclient import CellBaseClient
 import pandas as pd
-import argparse
-import urllib.request, json 
+from pandas.core.frame import DataFrame
 
 from host import host_address
 
 ## Query cellbase5 database 
-custom_config = {'rest': {'hosts': ['https://ws.zettagenomics.com/cellbase']}, 'version': 'v5', 'species': 'hsapiens'}
+custom_config = {'rest': {'hosts': [host_address]}, 'version': 'v5', 'species': 'hsapiens'}
 cc = ConfigClient(custom_config)
 cbc = CellBaseClient(cc)
 cbc.show_configuration()['version']
@@ -24,6 +23,7 @@ all_genes = []
 for row in range(len(HGNC_df)):
     HGNC_id = HGNC_df.iloc[row, 0] #HGNC ID is in 0th column
     ensemble_id = HGNC_df.iloc[row, 11] #Ensembl gene ID is in 12th column
+    # some genes do not have ensemble id so skip these
     if pd.isna(ensemble_id):
         print(HGNC_id + " does not have ensemble id to gene")
         pass
@@ -38,23 +38,27 @@ for row in range(len(HGNC_df)):
         # with urllib.request.urlopen(url_address) as url:
         #     data = json.loads(url.read().decode())
         data = gc.get_info(ensemble_id)
-        # how many transcripts are there?
-        txs_num = len(data['responses'][0]['results'][0]['transcripts'])
-        # for loop the ensemble transcripts to find what the refseq mane 
-        # transcripts are for the ensemble gene
-        for transcript in range(txs_num):
-            dicts = list(data['responses'][0]['results'][0]['transcripts'][transcript]['xrefs'])
-            mane_dict = [item for item in dicts if item["dbName"] == "mane_select_refseq"]
-            if not mane_dict:
-                # some ensemble transcripts do not have refseq mane transcript
-                # for these, we skip to the next transcript
-                continue
-            else:
-                # print("Transcript number " + str(transcript) + " DOES have Mane RefSeq Annotaion")
-                # print(mane_dict[0]['id'])
-                gene_dict['MANE_RefSeqID'] = mane_dict[0]['id']
-        # append the gene_dict to the list of all HGNC ids
-        all_genes.append(gene_dict) 
+        # some ensemble gene id not present in cellbase so skip these
+        if not data['responses'][0]['results']:
+            print(ensemble_id + " does not exist in cellbase5") 
+        else:
+            # how many transcripts are there?
+            txs_num = len(data['responses'][0]['results'][000]['transcripts'])
+            # for loop the ensemble transcripts to find what the refseq mane 
+            # transcripts are for the ensemble gene
+            for transcript in range(txs_num):
+                dicts = list(data['responses'][0]['results'][0]['transcripts'][transcript]['xrefs'])
+                mane_dict = [item for item in dicts if item["dbName"] == "mane_select_refseq"]
+                if not mane_dict:
+                    # some ensemble transcripts do not have refseq mane transcript
+                    # for these, we skip to the next transcript
+                    continue
+                else:
+                    # print("Transcript number " + str(transcript) + " DOES have Mane RefSeq Annotaion")
+                    # print(mane_dict[0]['id'])
+                    gene_dict['MANE_RefSeqID'] = mane_dict[0]['id']
+            # append the gene_dict to the list of all HGNC ids
+            all_genes.append(gene_dict) 
 
 
 
